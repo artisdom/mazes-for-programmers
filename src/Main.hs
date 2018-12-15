@@ -32,22 +32,10 @@ demoBinaryTreeMaze :: IO ()
 demoBinaryTreeMaze = do
     let m = 50
         n = 50
+    g <- getStdGen
 
-    -- This is the binary tree algorithm
-    -- It all runs in IO which sucks
-    -- I'll fix this later
-    openings <- foldlM (\os (i, j) -> do
-        let ns0 = []
-            ns1 = bool ns0 (Opening (i, j) N : ns0) (i > 0)
-            ns2 = bool ns1 (Opening (i, j) W : ns1) (j > 0)
-        mbOpening <- pickElement ns2
-        case mbOpening of
-            Nothing -> pure os
-            Just opening -> pure $ opening : os)
-        []
-        [(i, j) | i <- [0..(m - 1)], j <- [0..(n - 1)]]
-
-    let mbMaze = foldlM withOpening (maze m n) openings
+    let (openings, _) = doBinaryTree m n g
+        mbMaze = foldlM withOpening (maze m n) openings
         mz = case mbMaze of
             Nothing -> error "Invalid maze"
             Just mz' -> mz'
@@ -56,14 +44,28 @@ demoBinaryTreeMaze = do
     mazePng 20 p mz
     putStrLn "Done"
 
-pickElement :: [a] -> IO (Maybe a)
-pickElement xs = do
+doBinaryTree :: RandomGen g => Int -> Int -> g -> ([Opening], g)
+doBinaryTree m n g =
+    foldl'
+        (\(os, g') (i, j) ->
+            let ns0 = []
+                ns1 = bool ns0 (Opening (i, j) N : ns0) (i > 0)
+                ns2 = bool ns1 (Opening (i, j) W : ns1) (j > 0)
+                (mbOpening, g'') = pickElement ns2 g'
+            in case mbOpening of
+                Nothing -> (os, g'')
+                Just opening -> (opening : os, g''))
+        ([], g)
+        [(i, j) | i <- [0..(m - 1)], j <- [0..(n - 1)]]
+
+pickElement :: RandomGen g => [a] -> g -> (Maybe a, g)
+pickElement xs g =
     let count = length xs
-    if count > 0
-        then do
-            idx <- randomRIO (0, count - 1)
-            pure (Just $ xs !! idx)
-        else pure Nothing
+    in if count > 0
+        then
+            let (idx, g') = randomR (0, count - 1) g
+            in (Just $ xs !! idx, g')
+        else (Nothing, g)
 
 main :: IO ()
 main = demoBinaryTreeMaze
