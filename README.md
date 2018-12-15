@@ -8,6 +8,10 @@ The story thus far&hellip;
 * Implemented simple PNG rendering of gris
 * Implemented binary tree algorithm for generating mazes
 
+## Example
+
+![Sample](sample.png)
+
 ## Build
 
 ```bash
