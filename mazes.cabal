@@ -19,7 +19,12 @@ executable mazes
       MazesForProgrammers
     , MazesForProgrammers.Ascii
     , MazesForProgrammers.Funcs
+    , MazesForProgrammers.Png
     , MazesForProgrammers.Types
   build-depends:
-      base >= 4.7 && < 5
+      JuicyPixels
+    , JuicyPixels-canvas
+    , base >= 4.7 && < 5
     , containers
+    , process
+    , temporary

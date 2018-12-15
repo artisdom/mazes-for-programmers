@@ -2,6 +2,10 @@ module Main (main) where
 
 import           Data.Foldable
 import           MazesForProgrammers
+import           System.IO.Temp
+
+pngTempFileTemplate :: FilePath
+pngTempFileTemplate = "mazes-for-programmers-.png"
 
 main :: IO ()
 main = do
@@ -14,7 +18,10 @@ main = do
             , Opening (2, 2) N
             , Opening (4, 0) N
             ]
-    print mbMaze
-    case mbMaze of
-        Nothing -> putStrLn "Invalid maze"
-        Just m -> putStrLn $ mazeAscii m
+        mz@(Maze m n _) = case mbMaze of
+                Nothing -> error "Invalid maze"
+                Just mz' -> mz'
+    putStrLn $ mazeAscii mz
+    p <- emptySystemTempFile pngTempFileTemplate
+    mazePng p mz
+    putStrLn "Done"
