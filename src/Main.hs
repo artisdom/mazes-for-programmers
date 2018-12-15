@@ -15,4 +15,6 @@ main = do
             , Opening (0, 0) N
             ]
     print m
-    putStrLn $ mazeAscii m
+    case m of
+        Nothing -> putStrLn "Invalid maze"
+        Just m' -> putStrLn $ mazeAscii m'
