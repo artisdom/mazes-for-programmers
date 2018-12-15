@@ -32,6 +32,7 @@ demoBinaryTreeMaze :: IO ()
 demoBinaryTreeMaze = do
     let m = 50
         n = 50
+
     g <- getStdGen
 
     let (openings, _) = doBinaryTree m n g
