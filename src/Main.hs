@@ -1,10 +1,11 @@
 module Main (main) where
 
+import           Data.Foldable
 import           MazesForProgrammers
 
 main :: IO ()
 main = do
-    let m = maze 5 4
+    let mbMaze = foldlM withOpening (maze 5 4)
             [ Opening (0, 0) E
             , Opening (0, 1) E
             , Opening (0, 2) E
@@ -13,7 +14,7 @@ main = do
             , Opening (2, 2) N
             , Opening (4, 0) N
             ]
-    print m
-    case m of
+    print mbMaze
+    case mbMaze of
         Nothing -> putStrLn "Invalid maze"
-        Just m' -> putStrLn $ mazeAscii m'
+        Just m -> putStrLn $ mazeAscii m

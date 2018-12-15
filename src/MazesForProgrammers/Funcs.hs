@@ -1,11 +1,14 @@
 module MazesForProgrammers.Funcs
     ( maze
+    , withOpening
     ) where
 
-import           Data.Foldable
 import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import           MazesForProgrammers.Types
+
+maze :: Int -> Int -> Maze
+maze m n = Maze m n Map.empty
 
 updateSideMap :: Int -> Int -> Map Loc [Side] -> Opening -> Maybe (Map Loc [Side])
 updateSideMap m n mp (Opening loc@(i, j) side)
@@ -16,5 +19,5 @@ updateSideMap m n mp (Opening loc@(i, j) side)
     | otherwise = Nothing
     where mp' =  Map.insertWith (++) loc [side] mp
 
-maze :: Int -> Int -> [Opening] -> Maybe Maze
-maze m n os = Maze m n <$> (foldlM (updateSideMap m n) Map.empty os)
+withOpening :: Maze -> Opening -> Maybe Maze
+withOpening (Maze m n mp) o = Maze m n <$> updateSideMap m n mp o
