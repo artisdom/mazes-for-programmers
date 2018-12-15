@@ -12,7 +12,6 @@ main = do
             , Opening (1, 3) W
             , Opening (2, 2) N
             , Opening (4, 0) N
-            , Opening (0, 0) N
             ]
     print m
     case m of
