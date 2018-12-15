@@ -21,11 +21,13 @@ executable mazes
     , MazesForProgrammers.Funcs
     , MazesForProgrammers.Png
     , MazesForProgrammers.Types
+    , MazesForProgrammers.Util
   build-depends:
       JuicyPixels
     , JuicyPixels-canvas
     , base >= 4.7 && < 5
     , containers
+    , posix-escape
     , process
     , random
     , temporary

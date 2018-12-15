@@ -9,7 +9,7 @@ import           Data.Foldable
 import qualified Data.Map.Strict as Map
 import           Data.Word
 import           MazesForProgrammers.Types
-import           System.Process
+import           MazesForProgrammers.Util
 
 type Canvas_ = Canvas Word8
 
@@ -47,4 +47,4 @@ mazePng spacing path mz@(Maze m n _) = do
         c1 = foldl' (\c' i -> drawRow spacing mz i c') c0 [0..(m - 1)]
         img1 = canvasToImage c1
     writePng path img1
-    callCommand ("xdg-open " ++ path)
+    shellOpen path
