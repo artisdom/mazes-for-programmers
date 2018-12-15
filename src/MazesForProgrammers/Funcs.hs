@@ -8,14 +8,13 @@ import qualified Data.Map.Strict as Map
 import           MazesForProgrammers.Types
 
 updateSideMap :: Int -> Int -> Map Loc [Side] -> Opening -> Maybe (Map Loc [Side])
-updateSideMap m n mp (Opening loc@(i, j) side) =
-    let mp' =  Map.insertWith (++) loc [side] mp
-    in
-        case side of
-            N -> if i > 0 then Just (Map.insertWith (++) (i - 1, j) [S] mp') else Nothing
-            E -> if j < n - 1 then Just (Map.insertWith (++) (i, j + 1) [W] mp') else Nothing
-            S -> if i < m - 1 then Just (Map.insertWith (++) (i + 1, j) [N] mp') else Nothing
-            W -> if j > 0 then Just (Map.insertWith (++) (i, j - 1) [E] mp') else Nothing
+updateSideMap m n mp (Opening loc@(i, j) side)
+    | side == N && i > 0 = Just (Map.insertWith (++) (i - 1, j) [S] mp')
+    | side == E && j < n - 1 = Just (Map.insertWith (++) (i, j + 1) [W] mp')
+    | side == S && i < m - 1 = Just (Map.insertWith (++) (i + 1, j) [N] mp')
+    | side == W && j > 0 = Just (Map.insertWith (++) (i, j - 1) [E] mp')
+    | otherwise = Nothing
+    where mp' =  Map.insertWith (++) loc [side] mp
 
 maze :: Int -> Int -> [Opening] -> Maybe Maze
 maze m n os = Maze m n <$> (foldlM (updateSideMap m n) Map.empty os)
