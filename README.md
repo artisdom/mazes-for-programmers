@@ -1,5 +1,13 @@
 # Mazes for Programmers in Haskell
 
+## Notes
+
+The story thus far&hellip;
+
+* Implemented simple ASCII art rendering of grids
+* Implemented simple PNG rendering of gris
+* Implemented binary tree algorithm for generating mazes
+
 ## Build
 
 ```bash
