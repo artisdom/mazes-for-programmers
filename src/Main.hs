@@ -30,8 +30,8 @@ demoHandwrittenMaze = do
 
 demoBinaryTreeMaze :: IO ()
 demoBinaryTreeMaze = do
-    let m = 25
-        n = 25
+    let m = 50
+        n = 50
 
     -- This is the binary tree algorithm
     -- It all runs in IO which sucks
@@ -40,13 +40,10 @@ demoBinaryTreeMaze = do
         let ns0 = []
             ns1 = bool ns0 (Opening (i, j) N : ns0) (i > 0)
             ns2 = bool ns1 (Opening (i, j) W : ns1) (j > 0)
-            count = length ns2
-        if count > 0
-            then do
-                idx <- randomRIO (0, count - 1)
-                let opening = ns2 !! idx
-                pure $ opening : os
-            else pure os)
+        mbOpening <- pickElement ns2
+        case mbOpening of
+            Nothing -> pure os
+            Just opening -> pure $ opening : os)
         []
         [(i, j) | i <- [0..(m - 1)], j <- [0..(n - 1)]]
 
@@ -56,8 +53,17 @@ demoBinaryTreeMaze = do
             Just mz' -> mz'
 
     p <- emptySystemTempFile pngTempFileTemplate
-    mazePng 50 p mz
+    mazePng 20 p mz
     putStrLn "Done"
+
+pickElement :: [a] -> IO (Maybe a)
+pickElement xs = do
+    let count = length xs
+    if count > 0
+        then do
+            idx <- randomRIO (0, count - 1)
+            pure (Just $ xs !! idx)
+        else pure Nothing
 
 main :: IO ()
 main = demoBinaryTreeMaze
