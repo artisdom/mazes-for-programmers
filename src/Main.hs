@@ -30,7 +30,8 @@ demoHandwrittenMaze = do
 
 demoBinaryTreeMaze :: IO ()
 demoBinaryTreeMaze = do
-    let mz@(Maze m n _) = maze 25 25
+    let m = 25
+        n = 25
 
     -- This is the binary tree algorithm
     -- It all runs in IO which sucks
@@ -43,19 +44,19 @@ demoBinaryTreeMaze = do
         if count > 0
             then do
                 idx <- randomRIO (0, count - 1)
-                let neighbour = ns2 !! idx
-                pure $ neighbour : os
+                let opening = ns2 !! idx
+                pure $ opening : os
             else pure os)
         []
         [(i, j) | i <- [0..(m - 1)], j <- [0..(n - 1)]]
 
-    let mbResult = foldlM withOpening mz openings
-        result = case mbResult of
+    let mbMaze = foldlM withOpening (maze m n) openings
+        mz = case mbMaze of
             Nothing -> error "Invalid maze"
             Just mz' -> mz'
 
     p <- emptySystemTempFile pngTempFileTemplate
-    mazePng 50 p result
+    mazePng 50 p mz
     putStrLn "Done"
 
 main :: IO ()
