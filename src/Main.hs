@@ -25,12 +25,12 @@ demoHandwrittenMaze = do
                 Just mz' -> mz'
     putStrLn $ mazeAscii mz
     p <- emptySystemTempFile pngTempFileTemplate
-    mazePng p mz
+    mazePng 100 p mz
     putStrLn "Done"
 
 demoBinaryTreeMaze :: IO ()
 demoBinaryTreeMaze = do
-    let mz@(Maze m n _) = maze 5 4
+    let mz@(Maze m n _) = maze 25 25
 
     -- This is the binary tree algorithm
     -- It all runs in IO which sucks
@@ -55,7 +55,7 @@ demoBinaryTreeMaze = do
             Just mz' -> mz'
 
     p <- emptySystemTempFile pngTempFileTemplate
-    mazePng p result
+    mazePng 50 p result
     putStrLn "Done"
 
 main :: IO ()

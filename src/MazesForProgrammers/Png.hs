@@ -13,11 +13,8 @@ import           System.Process
 
 type Canvas_ = Canvas Word8
 
-spacing :: Int
-spacing = 100
-
-drawBox :: Maze -> Int -> Int -> Canvas_ -> Canvas_
-drawBox (Maze m n mp) i j c =
+drawBox :: Int -> Maze -> Int -> Int -> Canvas_ -> Canvas_
+drawBox spacing (Maze m n mp) i j c =
     let sides = Map.findWithDefault [] (i, j) mp
         w = m * spacing
         h = n * spacing
@@ -34,19 +31,20 @@ drawBox (Maze m n mp) i j c =
             , ((left, bottom, left, top), W)
             ]
 
-drawRow :: Maze -> Int -> Canvas_ -> Canvas_
-drawRow mz@(Maze _ n _) i c =
+drawRow :: Int -> Maze -> Int -> Canvas_ -> Canvas_
+drawRow spacing mz@(Maze _ n _) i c =
     foldl'
-        (\c' j -> drawBox mz i j c')
+        (\c' j -> drawBox spacing mz i j c')
         c
         [0..(n - 1)]
 
-mazePng path mz@(Maze m n _) = do
+mazePng :: Int -> FilePath -> Maze -> IO ()
+mazePng spacing path mz@(Maze m n _) = do
     let h = m * spacing
         w = n * spacing
         img = generateImage (\_ _ -> 255) w h
         Right c0 = imageToCanvas img
-        c1 = foldl' (\c' i -> drawRow mz i c') c0 [0..(m - 1)]
+        c1 = foldl' (\c' i -> drawRow spacing mz i c') c0 [0..(m - 1)]
         img1 = canvasToImage c1
     writePng path img1
     callCommand ("xdg-open " ++ path)
