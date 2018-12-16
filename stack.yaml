@@ -1,5 +1,4 @@
 resolver: lts-12.16
 allow-newer: true
 extra-deps:
-- JuicyPixels-canvas-0.1.0.0
 - posix-escape-0.1

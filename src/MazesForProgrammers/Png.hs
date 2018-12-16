@@ -3,7 +3,9 @@ module MazesForProgrammers.Png
     ) where
 
 import           Codec.Picture
-import           Codec.Picture.Canvas
+import           Codec.Picture.Types
+import           Control.Monad
+import           Control.Monad.Primitive
 import           Data.Bool
 import           Data.Foldable
 import qualified Data.Map.Strict as Map
@@ -11,40 +13,52 @@ import           Data.Word
 import           MazesForProgrammers.Types
 import           MazesForProgrammers.Util
 
-type Canvas_ = Canvas Word8
+withMutableImage :: (Pixel px, PrimMonad m) => Int -> Int -> px -> (MutableImage (PrimState m) px -> m ()) -> m (Image px)
+withMutableImage w h px f = do
+    m <- createMutableImage w h px
+    f m
+    unsafeFreezeImage m
 
-drawBox :: Int -> Maze -> Int -> Int -> Canvas_ -> Canvas_
-drawBox spacing (Maze m n mp) i j c =
-    let sides = Map.findWithDefault [] (i, j) mp
-        w = m * spacing
-        h = n * spacing
-        left = j * spacing
-        right = left + spacing - 1
-        top = i * spacing
-        bottom = top + spacing -1
-    in foldl'
-            (\c ((x0, y0, x1, y1), side) -> bool (drawLine x0 y0 x1 y1 0 c) c (side `elem` sides))
-            c
-            [ ((left, top, right, top), N)
-            , ((right, top, right, bottom), E)
-            , ((right, bottom, left, bottom), S)
-            , ((left, bottom, left, top), W)
-            ]
+green :: Double -> PixelRGB8
+green a =
+    let f = scale a; r = 0; g = 255; b = 0
+    in PixelRGB8 (f r) (f g) (f b)
 
-drawRow :: Int -> Maze -> Int -> Canvas_ -> Canvas_
-drawRow spacing mz@(Maze _ n _) i c =
-    foldl'
-        (\c' j -> drawBox spacing mz i j c')
-        c
-        [0..(n - 1)]
+scale :: Double -> Pixel8 -> Pixel8
+scale a x = round (a * fromIntegral x)
 
 mazePng :: Int -> FilePath -> Maze -> IO ()
-mazePng spacing path mz@(Maze m n _) = do
-    let h = m * spacing
-        w = n * spacing
-        img = generateImage (\_ _ -> 255) w h
-        Right c0 = imageToCanvas img
-        c1 = foldl' (\c' i -> drawRow spacing mz i c') c0 [0..(m - 1)]
-        img1 = canvasToImage c1
-    writePng path img1
+mazePng spacing path mz@(Maze m n mp) = do
+    let w = m * spacing
+        h = n * spacing
+    img <- withMutableImage w h (PixelRGB8 255 255 255) $ \mimg -> do
+        for_ [(i, j) | i <- [0..(m - 1)], j <- [0..(n - 1)]] $ \(i, j) -> do
+            let sides = Map.findWithDefault [] (i, j) mp
+                top = i * spacing
+                left = j * spacing
+                bottom = top + spacing - 1
+                right = left + spacing - 1
+            fillRectangle mimg left top right bottom (green ((fromIntegral $ i * j) / (fromIntegral $ m * n)))
+            for_
+                [ (N, drawHLine mimg left top right)
+                , (E, drawVLine mimg right top bottom)
+                , (S, drawHLine mimg right bottom left)
+                , (W, drawVLine mimg left bottom top)
+                ] $ \(side, action) -> unless (side `elem` sides) (action $ PixelRGB8 255 255 255)
+
+    writePng path img
     shellOpen path
+
+drawHLine :: (Pixel px, PrimMonad m) => MutableImage (PrimState m) px -> Int -> Int -> Int -> px -> m ()
+drawHLine m x0 y x1 px
+    | x1 > x0 = for_ [x0..x1] $ \x -> writePixel m x y px
+    | otherwise = for_ [x0, (x0 - 1)..x1] $ \x -> writePixel m x y px
+
+drawVLine :: (Pixel px, PrimMonad m) => MutableImage (PrimState m) px -> Int -> Int -> Int -> px -> m ()
+drawVLine m x y0 y1 px
+    | y1 > y0 = for_ [y0..y1] $ \y -> writePixel m x y px
+    | otherwise = for_ [y0, (y0 - 1)..y1] $ \y -> writePixel m x y px
+
+fillRectangle :: (Pixel px, PrimMonad m) => MutableImage (PrimState m) px -> Int -> Int -> Int -> Int -> px -> m ()
+fillRectangle m x0 y0 x1 y1 px =
+    for_ [(x, y) | x <- [x0..x1], y <- [y0..y1]] $ \(x, y) -> writePixel m x y px

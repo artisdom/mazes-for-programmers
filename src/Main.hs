@@ -30,10 +30,10 @@ demoHandwrittenMaze = do
 
 demoBinaryTreeMaze :: IO ()
 demoBinaryTreeMaze = do
-    let m = 50
-        n = 50
+    let m = 25
+        n = 25
 
-    g <- getStdGen
+    g <- newStdGen
 
     let (openings, _) = doBinaryTree m n g
         mbMaze = foldlM withOpening (maze m n) openings
@@ -43,6 +43,7 @@ demoBinaryTreeMaze = do
 
     p <- emptySystemTempFile pngTempFileTemplate
     mazePng 20 p mz
+
     putStrLn "Done"
 
 doBinaryTree :: RandomGen g => Int -> Int -> g -> ([Opening], g)

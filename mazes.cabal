@@ -24,10 +24,10 @@ executable mazes
     , MazesForProgrammers.Util
   build-depends:
       JuicyPixels
-    , JuicyPixels-canvas
     , base >= 4.7 && < 5
     , containers
     , posix-escape
+    , primitive
     , process
     , random
     , temporary
