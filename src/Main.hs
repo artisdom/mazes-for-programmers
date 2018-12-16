@@ -52,7 +52,7 @@ doBinaryTree m n g =
         (\(os, g') (i, j) ->
             let ns0 = []
                 ns1 = bool ns0 (Opening (i, j) N : ns0) (i > 0)
-                ns2 = bool ns1 (Opening (i, j) W : ns1) (j > 0)
+                ns2 = bool ns1 (Opening (i, j) E : ns1) (j < n - 1)
                 (mbOpening, g'') = pickElement ns2 g'
             in case mbOpening of
                 Nothing -> (os, g'')
