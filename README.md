@@ -12,6 +12,13 @@ The story thus far&hellip;
 
 ![Sample](sample.png)
 
+## Set up dev environment
+
+```bash
+stack build intero
+stack build --copy-compiler-tool ghcid
+```
+
 ## Build
 
 ```bash
