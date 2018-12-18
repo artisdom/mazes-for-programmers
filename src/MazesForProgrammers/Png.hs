@@ -13,6 +13,8 @@ import           Data.Word
 import           MazesForProgrammers.Types
 import           MazesForProgrammers.Util
 
+type Point2D = (Int, Int)
+
 withMutableImage :: (Pixel px, PrimMonad m) => Int -> Int -> px -> (MutableImage (PrimState m) px -> m ()) -> m (Image px)
 withMutableImage w h px f = do
     m <- createMutableImage w h px
@@ -38,7 +40,7 @@ mazePng spacing path mz@(Maze m n mp) = do
                 left = j * spacing
                 bottom = top + spacing - 1
                 right = left + spacing - 1
-            fillRectangle mimg left top right bottom (green ((fromIntegral $ i * j) / (fromIntegral $ m * n)))
+            fillRectangle mimg (left, top) (right, bottom) (green ((fromIntegral $ i * j) / (fromIntegral $ m * n)))
             for_
                 [ (N, drawHLine mimg left top right)
                 , (E, drawVLine mimg right top bottom)
@@ -59,6 +61,37 @@ drawVLine m x y0 y1 px
     | y1 > y0 = for_ [y0..y1] $ \y -> writePixel m x y px
     | otherwise = for_ [y0, (y0 - 1)..y1] $ \y -> writePixel m x y px
 
-fillRectangle :: (Pixel px, PrimMonad m) => MutableImage (PrimState m) px -> Int -> Int -> Int -> Int -> px -> m ()
-fillRectangle m x0 y0 x1 y1 px =
+fillRectangle :: (Pixel px, PrimMonad m) => MutableImage (PrimState m) px -> Point2D -> Point2D -> px -> m ()
+fillRectangle m (x0, y0) (x1, y1) px =
     for_ [(x, y) | x <- [x0..x1], y <- [y0..y1]] $ \(x, y) -> writePixel m x y px
+
+fillTriangle :: (Pixel px, PrimMonad m) => MutableImage (PrimState m) px -> Int -> Int -> Point2D -> Point2D -> Point2D -> px -> m ()
+fillTriangle m w h v0@(v0x, v0y) v1@(v1x, v1y) v2@(v2x, v2y) px =
+    let (minX, maxX) = minMax3 v0x v1x v2x
+        (minY, maxY) = minMax3 v0y v1y v2y
+        minX' = max minX 0
+        minY' = max minY 0
+        maxX' = min maxX (w - 1)
+        maxY' = min maxY (h - 1)
+    in
+        for_ [(x, y) | x <- [minX'..maxX'], y <- [minY'..maxY']] $ \p@(x, y) -> do
+            let w0 = orient2D v1 v2 p
+                w1 = orient2D v2 v0 p
+                w2 = orient2D v0 v1 p
+            when (w0 >= 0 && w1 >= 0 && w2 >= 0) $ writePixel m x y px
+
+orient2D :: Point2D -> Point2D -> Point2D -> Int
+orient2D (ax, ay) (bx, by) (cx, cy) = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax)
+
+min3 :: Int -> Int -> Int -> Int
+min3 a b c
+    | a < b = min a c
+    | otherwise = min b c
+
+max3 :: Int -> Int -> Int -> Int
+max3 a b c
+    | a > b = max a c
+    | otherwise = max b c
+
+minMax3 :: Int -> Int -> Int -> (Int, Int)
+minMax3 a b c = (min3 a b c, max3 a b c)
