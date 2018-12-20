@@ -26,6 +26,7 @@ executable mazes
       JuicyPixels
     , base >= 4.7 && < 5
     , containers
+    , juicy-draw
     , posix-escape
     , primitive
     , process
